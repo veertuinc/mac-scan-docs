@@ -6,6 +6,18 @@ type: "docs"
 
 {{< include file="_partials/what-is/_short.md" >}}
 
+Scanned languages/packages:
+
+- Ruby Gems
+- Python Packages
+- Javascript Node/NPM Packages
+- Java Packages
+- Golang Modules
+- Rust Cargo
+- Brew Formula
+- Apple Apps
+- Cocoapods
+
 ## Usage
 
 ### Install
@@ -44,6 +56,19 @@ You can then watch the logs with:
 [2022-09-12 20:56:45]  INFO GetDBType: bolt
 [2022-09-12 20:56:45]  INFO Loaded NVD count 133751
 [2022-09-12 20:56:45]  INFO Start listening on port 8081
+```
+
+You can also run and get the logs in STDOUT/ERR:
+
+```bash
+❯ ./runtime-mac-scan-server --log-to-file=false
+[2022-09-13 08:17:34]  INFO UpdateDB: last updated on %!w(time.Time={0 63798606230 <nil>})
+[2022-09-13 08:17:43]  INFO UpdateDB: newest update avaialble for 2022-09-12 19:03:50 +0000 UTC, exisiting date 2022-09-12 19:03:50 +0000 UTC
+[2022-09-13 08:17:43]  INFO UpdateDB: already has the latest version
+[2022-09-13 08:17:43]  INFO loading DB
+[2022-09-13 08:17:43]  INFO GetDBType: bolt
+[2022-09-13 08:17:47]  INFO Loaded NVD count 133751
+[2022-09-13 08:17:47]  INFO Start listening on port 8081
 ```
 
 ### Start / Stop Scanner
