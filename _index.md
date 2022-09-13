@@ -15,7 +15,7 @@ Scanned languages/packages:
 - Golang Modules
 - Rust Cargo
 - Brew Formula
-- Apple Apps
+- macOS Applications
 - Cocoapods
 
 ## Usage
