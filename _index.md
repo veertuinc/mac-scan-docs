@@ -115,6 +115,8 @@ No vulnerabilities found
 You can see nothing has changed on my computer yet, so nothing was discovered or found. Let's install an older version of jenkins with ruby gem, immediately stop the scanner so we only get the changes for the period of time we installed jenkins, and then generate the report:
 
 ```bash
+❯ sudo xcode-select --install
+❯ sudo xcodebuild -license accept
 ❯ sudo gem install --version 0.6.0 jenkins
 Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
 Fetching jenkins-0.6.0.gem
