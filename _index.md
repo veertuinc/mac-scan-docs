@@ -422,3 +422,63 @@ Generates and outputs to STDOUT a report of ONLY vulnerabilities the scan found 
       },
       "Package": {
 ```
+
+#### ?fromTime=
+
+Reports endpoints allow setting the `fromTime` to isolate packages and vulnerabilities from a specific time.
+
+**The time must be in RFC3339.** On MacOS, you can generate this time using `date -u +%Y-%m-%dT%H:%M:%SZ`.
+
+```bash
+❯ curl -s http://localhost:8081/report/vulnerabilities\?fromTime\=2022-09-13T12:47:33Z | jq | head -50
+{
+  "status": "OK",
+  "body": [
+    {
+      "Vulnerability": {
+        "MatchedCPEs": [
+          {
+            "Cpe": {
+              "Part": "a",
+              "Vendor": "john_nunemaker",
+              "Product": "crack",
+              "Version": "0\\.1\\.8",
+              "Update": "",
+              "Edition": "",
+              "SWEdition": "",
+              "TargetSW": "",
+              "TargetHW": "",
+              "Other": "",
+              "Language": ""
+            },
+            "Constraint": "= 0.1.8",
+            "Version": "0.1.8",
+            "MatchType": "Semantic"
+          },
+          {
+            "Cpe": {
+              "Part": "a",
+              "Vendor": "john_nunemaker",
+              "Product": "crack",
+              "Version": "",
+              "Update": "",
+              "Edition": "",
+              "SWEdition": "",
+              "TargetSW": "",
+              "TargetHW": "",
+              "Other": "",
+              "Language": ""
+            },
+            "Constraint": "<= 0.3.1",
+            "Version": "0.1.8",
+            "MatchType": "Semantic"
+          }
+        ],
+        "ID": "CVE-2013-1800",
+        "Namespace": "",
+        "Score": 7.5,
+        "URL": "https://nvd.nist.gov/vuln/detail/CVE-2013-1800",
+        "RelatedVulnerabilities": null
+      },
+      "Package": {
+```
