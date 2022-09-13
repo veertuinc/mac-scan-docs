@@ -71,6 +71,8 @@ You can also run and get the logs in STDOUT/ERR:
 [2022-09-13 08:17:47]  INFO Start listening on port 8081
 ```
 
+You will need to keep the server running the entire duration of your jobs.
+
 ### Start / Stop Scanner
 
 You'll then be able to make API calls, or use the CLI tool to start scanning:
