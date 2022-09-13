@@ -1,1 +1,1 @@
-# runtime-scan-docs
+We welcome community contributions! Simply fork and submit a PR.
