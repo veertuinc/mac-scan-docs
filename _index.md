@@ -106,6 +106,8 @@ brew            boost-build                                                     
 . . .
 . . .
 
+❯ ./mac-scan-cli report reset
+
 ❯ ./mac-scan-cli status
 State: Stopped
 
