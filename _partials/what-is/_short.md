@@ -1,7 +1,7 @@
 ---
 ---
 
-# About Runtime Mac Scan (beta)
+# About Mac Scan (beta)
 
 It's very common to download various packages and libraries on your build machines as part of CI/CD job execution. If any of these downloaded packages contain security vulnerabilities, it can create opportunity for bad actors to exploit these vulnerabilities and introduce undesirable actions during build and test automation. Some of these actions could be introducing exploits with the app, expose secrets, and allow infiltration of your internal network. Veertu's Runtime Mac Scan tool can identify security vulnerabilities in these downloaded libraries and packages during runtime(when the build and test job is running) and flag them, leaving it up to your team to script what actions to take from the results. You can choose to fail the job and address the vulnerabilities detected or mark them as success, but log the vulnerabilities to resolve later.
 
