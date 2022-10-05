@@ -23,9 +23,9 @@ Scanned languages/packages:
 ### Install
 
 ```bash
-FULL_FILE_NAME=$(echo $(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/runtime-mac-scan) | cut -d/ -f5)
+FULL_FILE_NAME=$(echo $(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/mac-scan) | cut -d/ -f5)
 PARTIAL_FILE_NAME=$(echo $FULL_FILE_NAME | awk -F'.zip' '{print $1}')
-curl -Ls https://veertu.com/downloads/runtime-mac-scan -o $FULL_FILE_NAME
+curl -Ls https://veertu.com/downloads/mac-scan -o $FULL_FILE_NAME
 unzip $FULL_FILE_NAME
 rm -f $FULL_FILE_NAME
 cd $PARTIAL_FILE_NAME
@@ -34,80 +34,87 @@ cd $PARTIAL_FILE_NAME
 
 There are two binaries included in the archive.
 
-1. **`runtime-mac-scan-server`** This is the server which will watch for changes/filesystem events. It will run on port 8081 by default (you can change this with `--listen-port`) and exposes a REST API.
-2. **`runtime-mac-scan-cli`** This is the CLI which can interact with the server's API.
+1. **`mac-scan-server`** This is the server which will scan and even watch for changes/filesystem events. It will run on port 8081 by default (you can change this with `--listen-port`) and exposes a REST API.
+2. **`mac-scan-cli`** This is the CLI which can interact with the server's API.
 
 ### Run Server
 
 ```bash
-❯ ./runtime-mac-scan-server
+❯ ./mac-scan-server
+[2022-10-05 16:34:05]  INFO UpdateDB: No meta file scanner.db.meta found
+[2022-10-05 16:34:05]  INFO Start listening on port 8081
+
+[2022-10-05 16:34:05]  INFO UpdateDB: newest update available for 2022-10-03 19:03:58 +0000 UTC, existing date 0001-01-01 00:00:00 +0000 UTC
+[2022-10-05 16:34:05]  INFO UpdateDB: downloading update...
+[2022-10-05 16:34:05]  INFO Downloading from https://downloads.veertu.com/scanner/scanner.db.2022-10-03T19:03:58Z.zip to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4226610147/scanner.db
+[2022-10-05 16:34:10]  INFO Downloaded to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4226610147/scanner.db
+[2022-10-05 16:34:10]  INFO loading DB
+[2022-10-05 16:34:10]  INFO GetDBType: bolt
+[2022-10-05 16:34:10]  INFO Loaded NVD count 135388
 ```
 
-You can then watch the logs with:
-
-```bash
-❯ tail -f runtime-mac-scan-server.log
-[2022-09-12 20:56:37]  INFO UpdateDB: No meta file scanner.db.meta found
-[2022-09-12 20:56:37]  INFO UpdateDB: newest update avaialble for 2022-09-12 19:03:50 +0000 UTC, exisiting date 0001-01-01 00:00:00 +0000 UTC
-[2022-09-12 20:56:37]  INFO UpdateDB: downloading update...
-[2022-09-12 20:56:37]  INFO Downloading from https://downloads.veertu.com/scanner/scanner.db.2022-09-12T19:03:50Z.zip to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4241391468/scanner.db
-[2022-09-12 20:56:45]  INFO Downloaded to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4241391468/scanner.db
-[2022-09-12 20:56:45]  INFO loading DB
-[2022-09-12 20:56:45]  INFO GetDBType: bolt
-[2022-09-12 20:56:45]  INFO Loaded NVD count 133751
-[2022-09-12 20:56:45]  INFO Start listening on port 8081
-```
-
-You can also run and get the logs in STDOUT/ERR:
-
-```bash
-❯ ./runtime-mac-scan-server --log-to-file=false
-[2022-09-13 08:17:34]  INFO UpdateDB: last updated on %!w(time.Time={0 63798606230 <nil>})
-[2022-09-13 08:17:43]  INFO UpdateDB: newest update avaialble for 2022-09-12 19:03:50 +0000 UTC, exisiting date 2022-09-12 19:03:50 +0000 UTC
-[2022-09-13 08:17:43]  INFO UpdateDB: already has the latest version
-[2022-09-13 08:17:43]  INFO loading DB
-[2022-09-13 08:17:43]  INFO GetDBType: bolt
-[2022-09-13 08:17:47]  INFO Loaded NVD count 133751
-[2022-09-13 08:17:47]  INFO Start listening on port 8081
-```
-
-You will need to keep the server running the entire duration of your jobs.
+You will need to keep the server running the entire duration of your job/scan.
 
 ### Start / Stop Scanner
 
 You'll then be able to make API calls, or use the CLI tool to start scanning:
 
 ```bash
-❯ ./runtime-mac-scan-cli
-This tool provides an interface to communicate with runtime scanner
+❯ ./mac-scan-cli
+This tool provides an interface to communicate with the mac-scan-server API
 
 Usage:
-  runtime-mac-scan-cli [flags]
-  runtime-mac-scan-cli [command]
+  mac-scan-cli [flags]
+  mac-scan-cli [command]
 
 Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  report      Report scanning result
-  start       Start scanning
-  status      Get status
-  stop        Stop scanning
-  version     Print the version number of rs-cli
+  background-watch Start and stop the scan in the background, allowing you to watch for and scan file system changes
+  completion       Generate the autocompletion script for the specified shell
+  fullscan         Catalog all the packages on the disk
+  help             Help about any command
+  license          License show/activate
+  report           Report scanning result
+  status           Get status
+  version          Print the version number of rs-cli
 
 Flags:
-  -h, --help   help for runtime-mac-scan-cli
+  -h, --help   help for mac-scan-cli
 
-Use "runtime-mac-scan-cli [command] --help" for more information about a command.
+Use "mac-scan-cli [command] --help" for more information about a command.
 
-❯ ./runtime-mac-scan-cli status
+❯ ./mac-scan-cli fullscan
+
+❯ ./mac-scan-cli report
+TYPE            NAME                                                                           VERSION                                                                                           
+brew            amazon-ecs-cli                                                                 1.21.0                                                                                             
+brew            anka-scripts                                                                   c2c6cc19c6406af1bc3b522a14c3884644488954                                                           
+brew            ansible                                                                        6.2.0                                                                                              
+brew            ansible-lint                                                                   6.4.0                                                                                              
+brew            aom                                                                            3.4.0                                                                                              
+brew            apr                                                                            1.7.0_2                                                                                            
+brew            apr-util                                                                       1.6.1_4                                                                                            
+brew            augeas                                                                         1.12.0_1                                                                                           
+brew            autoconf                                                                       2.71                                                                                               
+brew            automake                                                                       1.16.5                                                                                             
+brew            aws-iam-authenticator                                                          0.5.9                                                                                              
+brew            awscli                                                                         2.7.23                                                                                             
+brew            bazel                                                                          5.2.0                                                                                              
+brew            bdw-gc                                                                         8.0.6                                                                                              
+brew            berkeley-db                                                                    18.1.40_1                                                                                          
+brew            boost                                                                          1.79.0_1                                                                                           
+brew            boost-build                                                                    1.79.0                                                                                          
+. . .
+. . .
+
+❯ ./mac-scan-cli status
 State: Stopped
 
-❯ ./runtime-mac-scan-cli start
+❯ ./mac-scan-cli background-watch start
 
-❯ ./runtime-mac-scan-cli status
+❯ ./mac-scan-cli status
 State: Running
 
-❯ ./runtime-mac-scan-cli report
+❯ ./mac-scan-cli report
 No packages discovered
 No vulnerabilities found
 ```
@@ -124,46 +131,31 @@ Installing ri documentation for jenkins-0.6.0
 Done installing documentation for jenkins after 0 seconds
 1 gem installed
 
-❯ ./runtime-mac-scan-cli stop
-
-❯ tail -f runtime-mac-scan-server.log
-[2022-09-12 21:06:04]  INFO UpdateDB: last updated on %!w(time.Time={0 63798606230 <nil>})
-[2022-09-12 21:06:04]  INFO UpdateDB: newest update avaialble for 2022-09-12 19:03:50 +0000 UTC, exisiting date 2022-09-12 19:03:50 +0000 UTC
-[2022-09-12 21:06:04]  INFO UpdateDB: already has the latest version
-[2022-09-12 21:06:04]  INFO loading DB
-[2022-09-12 21:06:04]  INFO GetDBType: bolt
-[2022-09-12 21:06:05]  INFO Loaded NVD count 133751
-[2022-09-12 21:06:05]  INFO Start listening on port 8081
-
-[2022-09-12 21:06:22]  INFO Start listening to fs events
-
-[2022-09-12 21:06:34]  INFO Stop listening to fs events
+❯ ./mac-scan-cli stop
 ```
 
 ### Generate Report
 
 ``` bash
-❯ ./runtime-mac-scan-cli report vulnerabilities | head -20
-TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY
-gem           actionpack        3.0.1              CVE-2022-27777    6.1    medium
-gem           crack             0.1.8              CVE-2013-1800     7.5    high
-gem           httparty          0.6.1              CVE-2013-1801     7.5    high
-gem           i18n              0.4.2              CVE-2013-4492     4.3    medium
-gem           i18n              0.4.2              CVE-2014-10077    7.5    high
-gem           i18n              0.4.2              CVE-2020-7791     7.5    high
-gem           jenkins           0.6.0              CVE-2012-0324     4.3    medium
-gem           jenkins           0.6.0              CVE-2012-0325     4.3    medium
-gem           jenkins           0.6.0              CVE-2012-0785     7.8    high
-gem           jenkins           0.6.0              CVE-2012-4438     8.8    high
-gem           jenkins           0.6.0              CVE-2012-4439     6.1    medium
-gem           jenkins           0.6.0              CVE-2012-4440     6.1    medium
-gem           jenkins           0.6.0              CVE-2012-4441     6.1    medium
-gem           jenkins           0.6.0              CVE-2012-6072     4.3    medium
-gem           jenkins           0.6.0              CVE-2012-6073     5.8    medium
-gem           jenkins           0.6.0              CVE-2012-6074     3.5    low
-gem           jenkins           0.6.0              CVE-2013-0158     2.6    low
-gem           jenkins           0.6.0              CVE-2013-0327     6.8    medium
-gem           jenkins           0.6.0              CVE-2013-0328     4.3    medium
+❯ ./mac-scan-cli report vulnerabilities | head -20
+TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY 
+gem           actionpack        3.0.1              CVE-2022-27777    6.1    medium    
+gem           crack             0.1.8              CVE-2013-1800     7.5    high      
+gem           httparty          0.6.1              CVE-2013-1801     7.5    high      
+gem           i18n              0.4.2              CVE-2013-4492     4.3    medium    
+gem           i18n              0.4.2              CVE-2014-10077    7.5    high      
+gem           i18n              0.4.2              CVE-2020-7791     7.5    high      
+gem           jenkins           0.6.0              CVE-2012-0324     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-0325     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-0785     7.8    high      
+gem           jenkins           0.6.0              CVE-2012-4438     8.8    high      
+gem           jenkins           0.6.0              CVE-2012-4439     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-4440     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-4441     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-6072     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-6073     5.8    medium    
+gem           jenkins           0.6.0              CVE-2012-6074     3.5    low       
+gem           jenkins           0.6.0              CVE-2013-0158     2.6    low       
 ```
 
 ## REST API
