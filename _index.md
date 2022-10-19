@@ -24,51 +24,121 @@ Scanned languages/packages:
 
 ```bash
 FULL_FILE_NAME=$(echo $(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/mac-scan) | cut -d/ -f5)
-PARTIAL_FILE_NAME=$(echo $FULL_FILE_NAME | awk -F'.zip' '{print $1}')
-curl -Ls https://veertu.com/downloads/mac-scan -o $FULL_FILE_NAME
-unzip $FULL_FILE_NAME
-rm -f $FULL_FILE_NAME
-cd $PARTIAL_FILE_NAME
+curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/mac-scan
+sudo installer -pkg $FULL_FILE_NAME -tgt /
 
 ```
 
-There are two binaries included in the archive.
-
-1. **`mac-scan-server`** This is the server which will scan and even watch for changes/filesystem events. It will run on port 8081 by default (you can change this with `--listen-port`) and exposes a REST API.
-2. **`mac-scan-cli`** This is the CLI which can interact with the server's API.
-
-### Run Server
+Once the mac-scan package has been installed, the binaries and other mac-scan related data is stored under `/Library/Application Support/mac-scan`.
 
 ```bash
-❯ ./mac-scan-server
-[2022-10-05 16:34:05]  INFO UpdateDB: No meta file scanner.db.meta found
-[2022-10-05 16:34:05]  INFO Start listening on port 8081
+❯ sudo pkgutil --pkg-info com.veertu.mac-scan
+package-id: com.veertu.mac-scan
+version: 0.2.0
+volume: /
+location: /
+install-time: 1666209750
 
-[2022-10-05 16:34:05]  INFO UpdateDB: newest update available for 2022-10-03 19:03:58 +0000 UTC, existing date 0001-01-01 00:00:00 +0000 UTC
-[2022-10-05 16:34:05]  INFO UpdateDB: downloading update...
-[2022-10-05 16:34:05]  INFO Downloading from https://downloads.veertu.com/scanner/scanner.db.2022-10-03T19:03:58Z.zip to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4226610147/scanner.db
-[2022-10-05 16:34:10]  INFO Downloaded to /var/folders/cg/zwnjml252tv9d58337f_7xpm0000gn/T/scan-tmpdir4226610147/scanner.db
-[2022-10-05 16:34:10]  INFO loading DB
-[2022-10-05 16:34:10]  INFO GetDBType: bolt
-[2022-10-05 16:34:10]  INFO Loaded NVD count 135388
+❯ sudo pkgutil --files com.veertu.mac-scan
+Library
+Library/Application Support
+Library/Application Support/mac-scan
+Library/Application Support/mac-scan/bin
+Library/Application Support/mac-scan/bin/mac-scan-cli
+Library/Application Support/mac-scan/bin/mac-scand
+Library/Application Support/mac-scan/mac-scan.yml
+Library/Application Support/mac-scan/uninstall.sh
+Library/LaunchDaemons
+Library/LaunchDaemons/com.veertu.mac-scan.plist
+
+❯ sudo launchctl print system/com.veertu.mac-scan
+. . .
+        path = /Library/LaunchDaemons/com.veertu.mac-scan.plist
+        state = running
+        program = /Library/Application Support/mac-scan/bin/mac-scand
+        arguments = {
+                /Library/Application Support/mac-scan/bin/mac-scand
+                -c
+                /Library/Application Support/mac-scan/mac-scan.yml
+        }
+. . .
+
+❯ ls -laht /usr/local/bin | grep mac-scan
+lrwxr-xr-x    1 root          admin    54B Oct 19 16:06 mac-scan-cli -> /Library/Application Support/mac-scan/bin/mac-scan-cli
 ```
 
-You will need to keep the server running the entire duration of your job/scan.
+As you can see, the plist will keep the `mac-scand` running on the host and available for the `mac-scan-cli` or even direct API calls.
+
+{{< hint info >}}
+Note that there is an uninstaller script:
+
+```bash
+❯ sudo /Library/Application\ Support/mac-scan/uninstall.sh
+The following packages will be REMOVED:
+  mac-scan-0.2.0
+Do you wish to continue [Y/n]?Y
+mac-scan uninstall process started...
+[1/3] [DONE] Successfully deleted shortcut links
+[2/3] [DONE] Successfully deleted mac-scan info
+[3/3] [DONE] Successfully deleted mac-scan
+mac-scan uninstall process finished!
+```
+{{< /hint >}}
+
+### Configure
+
+Within the mac-scan application support directory is the `mac-scan.yml`. This can be modified to change logging locations as well as the API port (defaulting to 8081).
+
+```bash
+❯ cat /Library/Application\ Support/mac-scan/mac-scan.yml 
+log-level: "logrus.InfoLevel"
+log-to-file: true
+log-file: "/Library/Logs/mac-scan/mac-scan.log"
+vuln-db-path: "/Library/Application Support/mac-scan/scanner.db"
+disable-auto-update: false
+ignore-packages:
+  - "cpe:/a:apple:icloud:1.0"
+listen-port: 8081
+db-backend-path: "/Library/Application Support/mac-scan/pkgstore.db"
+```
+
+### Generate Report
+
+```bash
+❯ mac-scan-cli report --help                    
+Display scanning results from the beginning of the last start command or user provided date
+
+Usage:
+  mac-scan-cli report [flags]
+  mac-scan-cli report [command]
+
+Available Commands:
+  packages        Report detected packages
+  reset           Reset scanning results
+  vulnerabilities Report detected vulnerabilities
+
+Flags:
+  -h, --help                   help for report
+  -f, --report-format string   report output format, formats=[json table] (default "table")
+  -t, --timestamp string       report packages newer than specified time (RFC3339 format)
+
+Use "mac-scan-cli report [command] --help" for more information about a command.
+```
 
 ### Start / Stop Scanner
 
-You'll then be able to make API calls, or use the CLI tool to start scanning:
+#### Full Scan
 
 ```bash
-❯ ./mac-scan-cli
-This tool provides an interface to communicate with the mac-scan-server API
+❯ mac-scan-cli       
+This tool provides an interface to communicate with the mac-scand API
 
 Usage:
   mac-scan-cli [flags]
   mac-scan-cli [command]
 
 Available Commands:
-  background-watch Start and stop the scan in the background, allowing you to watch for and scan file system changes
+  background-watch Watch for file system changes in the background
   completion       Generate the autocompletion script for the specified shell
   fullscan         Catalog all the packages on the disk
   help             Help about any command
@@ -82,16 +152,21 @@ Flags:
 
 Use "mac-scan-cli [command] --help" for more information about a command.
 
-❯ ./mac-scan-cli fullscan
+❯ mac-scan-cli report
+No packages discovered
+No vulnerabilities found
 
-❯ ./mac-scan-cli report
+❯ mac-scan-cli fullscan
+
+❯ mac-scan-cli report | head -20 
 TYPE            NAME                                                                           VERSION                                                                                           
 brew            amazon-ecs-cli                                                                 1.21.0                                                                                             
 brew            anka-scripts                                                                   c2c6cc19c6406af1bc3b522a14c3884644488954                                                           
 brew            ansible                                                                        6.2.0                                                                                              
 brew            ansible-lint                                                                   6.4.0                                                                                              
-brew            aom                                                                            3.4.0                                                                                              
+brew            aom                                                                            3.5.0_1                                                                                            
 brew            apr                                                                            1.7.0_2                                                                                            
+brew            apr                                                                            1.7.0_3                                                                                            
 brew            apr-util                                                                       1.6.1_4                                                                                            
 brew            augeas                                                                         1.12.0_1                                                                                           
 brew            autoconf                                                                       2.71                                                                                               
@@ -100,30 +175,41 @@ brew            aws-iam-authenticator                                           
 brew            awscli                                                                         2.7.23                                                                                             
 brew            bazel                                                                          5.2.0                                                                                              
 brew            bdw-gc                                                                         8.0.6                                                                                              
+brew            bdw-gc                                                                         8.2.2                                                                                              
 brew            berkeley-db                                                                    18.1.40_1                                                                                          
-brew            boost                                                                          1.79.0_1                                                                                           
-brew            boost-build                                                                    1.79.0                                                                                          
+brew            boost                                                                          1.80.0                                                                                             
+brew            boost-build                                                                    1.79.0                                                                                             
 . . .
-. . .
 
-❯ ./mac-scan-cli report reset
+❯ mac-scan-cli report reset
 
-❯ ./mac-scan-cli status
-State: Stopped
-
-❯ ./mac-scan-cli background-watch start
-
-❯ ./mac-scan-cli status
-State: Running
-
-❯ ./mac-scan-cli report
+❯ mac-scan-cli report
 No packages discovered
 No vulnerabilities found
+
 ```
 
-You can see nothing has changed on my computer yet, so nothing was discovered or found. Let's install an older version of jenkins with ruby gem, immediately stop the scanner so we only get the changes for the period of time we installed jenkins, and then generate the report:
+#### Active Background Scan
 
 ```bash
+❯ mac-scan-cli status      
+Service State:                  Active
+Background Watch State:         Stopped
+
+❯ mac-scan-cli background-watch start
+
+❯ mac-scan-cli status                
+Service State:                  Active
+Background Watch State:         Running
+
+❯ mac-scan-cli report
+No packages discovered
+No vulnerabilities found
+
+# You can see nothing has changed on my computer yet, so nothing was discovered or found. 
+# Let's install an older version of jenkins with ruby gem, immediately stop the scanner 
+# so we only get the changes for the period of time we installed jenkins, and then generate the report:
+
 ❯ sudo gem install --version 0.6.0 jenkins
 Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
 Fetching jenkins-0.6.0.gem
@@ -133,13 +219,9 @@ Installing ri documentation for jenkins-0.6.0
 Done installing documentation for jenkins after 0 seconds
 1 gem installed
 
-❯ ./mac-scan-cli stop
-```
+❯ mac-scan-cli background-watch stop
 
-### Generate Report
-
-``` bash
-❯ ./mac-scan-cli report vulnerabilities | head -20
+❯ mac-scan-cli report vulnerabilities | head -20
 TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY 
 gem           actionpack        3.0.1              CVE-2022-27777    6.1    medium    
 gem           crack             0.1.8              CVE-2013-1800     7.5    high      
