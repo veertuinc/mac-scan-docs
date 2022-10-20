@@ -6,18 +6,6 @@ type: "docs"
 
 {{< include file="_partials/what-is/_short.md" >}}
 
-Scanned languages/packages:
-
-- Ruby Gems
-- Python Packages
-- Javascript Node/NPM Packages
-- Java Packages
-- Golang Modules
-- Rust Cargo
-- Brew Formula
-- MacOS Applications
-- Cocoapods
-
 ## Usage
 
 ### Install
@@ -26,7 +14,6 @@ Scanned languages/packages:
 FULL_FILE_NAME=$(echo $(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/mac-scan) | cut -d/ -f5)
 curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/mac-scan
 sudo installer -pkg $FULL_FILE_NAME -tgt /
-
 ```
 
 Once the mac-scan package has been installed, the binaries and other mac-scan related data is stored under `/Library/Application Support/mac-scan`.
@@ -125,7 +112,7 @@ Flags:
 Use "mac-scan-cli report [command] --help" for more information about a command.
 ```
 
-### Start / Stop Scanner
+### Scan Modes
 
 #### Full Scan
 
@@ -189,7 +176,7 @@ No vulnerabilities found
 
 ```
 
-#### Active Background Scan
+#### Background Watch
 
 ```bash
 ❯ mac-scan-cli status      
