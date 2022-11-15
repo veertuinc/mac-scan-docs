@@ -233,39 +233,59 @@ gem           jenkins           0.6.0              CVE-2013-0158     2.6    low
 
 An alternative to the included CLI is using the API directly with `curl`.
 
-### /status
+### /v1/status
 
 Returns the state of the scanning.
 
 ```bash
-❯ curl http://localhost:8081/status
+❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Stopped"},"error":""}
 ```
 
-### /start
+### /v1/backgroundwatch/start (POST)
 
 Starts the scanning.
 
 ```bash
-❯ curl http://localhost:8081/start
+❯ curl http://localhost:8081/v1/status
+{"status":"OK","body":{"state":"Stopped"},"error":""}
+❯ curl -X POST http://localhost:8081/v1/backgroundwatch/start
+{"status":"OK","body":{"state":"Running"},"error":""}
+❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Running"},"error":""}
 ```
 
-### /stop
+### /v1/backgroundwatch/stop (POST)
 
 Stops the scanning and forces population of packages and vulnerabilities.
 
 ```bash
-❯ curl http://localhost:8081/stop
+❯ curl http://localhost:8081/v1/status
+{"status":"OK","body":{"state":"Running"},"error":""}
+❯ curl -X POST http://localhost:8081/v1/backgroundwatch/stop
+{"status":"OK","body":{"state":"Running"},"error":""}
+# Be patient as this can take a long time to return depending on the scan's state
+❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Stopped"},"error":""}
 ```
 
-### /report
+### /v1/fullscan (POST)
+
+Stops the scanning and forces population of packages and vulnerabilities.
+
+```bash
+❯ curl -X POST http://localhost:8081/v1/fullscan
+{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+❯ curl http://localhost:8081/v1/status          
+{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+```
+
+### /v1/report
 
 Generates and outputs to STDOUT a report of packages and vulnerabilities the scan found while running.
 
 ```bash
-❯ curl -s http://localhost:8081/report | jq | head -50
+❯ curl -s http://localhost:8081/v1/report | jq | head -50
 {
   "status": "OK",
   "body": {
@@ -319,7 +339,7 @@ Generates and outputs to STDOUT a report of packages and vulnerabilities the sca
 ```
 
 ```bash
-❯ curl -s http://localhost:8081/report | jq '.body.vulnerabilities' | head -50
+❯ curl -s http://localhost:8081/v1/report | jq '.body.vulnerabilities' | head -50
 [
   {
     "Vulnerability": {
@@ -372,12 +392,12 @@ Generates and outputs to STDOUT a report of packages and vulnerabilities the sca
       "Name": "crack",
 ```
 
-#### /report/packages
+#### /v1/report/packages
 
 Generates and outputs to STDOUT a report of ONLY the packages the scan found while running.
 
 ```bash
-❯ curl -s http://localhost:8081/report/packages | jq | head -50
+❯ curl -s http://localhost:8081/v1/report/packages | jq | head -50
 {
   "status": "OK",
   "body": [
@@ -430,12 +450,12 @@ Generates and outputs to STDOUT a report of ONLY the packages the scan found whi
         "cpe:2.3:a:ruby:builder:2.1.2:*:*:*:*:*:*:*",
 ```
 
-#### /report/vulnerabilities
+#### /v1/report/vulnerabilities
 
 Generates and outputs to STDOUT a report of ONLY vulnerabilities the scan found while running.
 
 ```bash
-❯ curl -s http://localhost:8081/report/vulnerabilities | jq | head -50
+❯ curl -s http://localhost:8081/v1/report/vulnerabilities | jq | head -50
 {
   "status": "OK",
   "body": [
@@ -488,6 +508,15 @@ Generates and outputs to STDOUT a report of ONLY vulnerabilities the scan found 
       "Package": {
 ```
 
+### /v1/report/reset (POST)
+
+Resets the current catalog of vulnerabilities and packages.
+
+```bash
+❯ curl -X POST http://localhost:8081/v1/report/reset
+{"status":"OK","body":{"state":"Running"},"error":""}
+```
+
 #### ?fromTime=
 
 Reports endpoints allow setting the `fromTime` to isolate packages and vulnerabilities from a specific time.
@@ -495,7 +524,7 @@ Reports endpoints allow setting the `fromTime` to isolate packages and vulnerabi
 **The time must be in RFC3339.** On MacOS, you can generate this time using `date -u +%Y-%m-%dT%H:%M:%SZ`.
 
 ```bash
-❯ curl -s http://localhost:8081/report/vulnerabilities\?fromTime\=2022-09-13T12:47:33Z | jq | head -50
+❯ curl -s http://localhost:8081/v1/report/vulnerabilities\?fromTime\=2022-09-13T12:47:33Z | jq | head -50
 {
   "status": "OK",
   "body": [
