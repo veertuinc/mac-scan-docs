@@ -21,7 +21,7 @@ Once the mac-scan package has been installed, the binaries and other mac-scan re
 ```bash
 ❯ sudo pkgutil --pkg-info com.veertu.mac-scan
 package-id: com.veertu.mac-scan
-version: 0.2.0
+version: 0.3.0
 volume: /
 location: /
 install-time: 1666209750
@@ -62,7 +62,7 @@ Note that there is an uninstaller script:
 ```bash
 ❯ sudo /Library/Application\ Support/mac-scan/uninstall.sh
 The following packages will be REMOVED:
-  mac-scan-0.2.0
+  mac-scan-0.3.0
 Do you wish to continue [Y/n]?Y
 mac-scan uninstall process started...
 [1/3] [DONE] Successfully deleted shortcut links
