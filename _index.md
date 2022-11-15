@@ -112,6 +112,113 @@ Flags:
 Use "mac-scan-cli report [command] --help" for more information about a command.
 ```
 
+#### Filtering and Sorting
+
+```bash
+❯ mac-scan-cli report vulnerabilities --help
+Display detected vulnerabilities from the beginning of the last start command or user provided date
+
+Usage:
+  mac-scan-cli report vulnerabilities [flags]
+
+Flags:
+  -h, --help   help for vulnerabilities
+
+Global Flags:
+  -c, --display-columns string   display columns for table format, columns=[Type - 't' Name - 'n' Version - 'v' Vulnerability - 'V' Score - 's' Severity - 'S' Location - 'l']
+  -m, --min-score float32        filter vulnerabilities by score
+  -f, --report-format string     report output format, formats=[json table] (default "table")
+  -s, --sort string              sort results for table format, options=[{score,s} {name,n} {type,t}]
+  -t, --timestamp string         report packages newer than specified time (RFC3339 format)
+```
+
+```bash
+❯ mac-scan-cli report packages --help       
+Display detected packages from the beginning of the last start command or user provided date
+
+Usage:
+  mac-scan-cli report packages [flags]
+
+Flags:
+  -h, --help   help for packages
+
+Global Flags:
+  -c, --display-columns string   display columns for table format, columns=[Type - 't' Name - 'n' Version - 'v' Vulnerability - 'V' Score - 's' Severity - 'S' Location - 'l']
+  -m, --min-score float32        filter vulnerabilities by score
+  -f, --report-format string     report output format, formats=[json table] (default "table")
+  -s, --sort string              sort results for table format, options=[{score,s} {name,n} {type,t}]
+  -t, --timestamp string         report packages newer than specified time (RFC3339 format)
+```
+
+There are several ways to filter results.
+
+1. `--min-score` to specify minimal score:
+
+  ```bash
+  ❯ mac-scan-cli report vulnerabilities --min-score 8.3
+  TYPE  NAME                VERSION  VULNERABILITY   SCORE  SEVERITY 
+  npm   chainsaw            0.1.0    CVE-2020-9493   9.8    critical  
+  npm   chainsaw            0.1.0    CVE-2022-23307  9.0    critical  
+  npm   connect             3.7.0    CVE-2016-0948   8.8    high      
+  npm   connect             3.7.0    CVE-2016-0949   10.0   critical  
+  npm   connect             3.7.0    CVE-2017-11291  10.0   critical  
+  npm   connect             3.7.0    CVE-2018-12804  9.8    critical  
+  npm   connect             3.7.0    CVE-2018-12805  9.8    critical  
+  npm   connect             3.7.0    CVE-2018-4923   9.1    critical  
+  npm   connect             3.7.0    CVE-2021-40719  9.8    critical  
+  npm   json-schema         0.2.3    CVE-2021-3918   9.8    critical  
+  npm   minimist            1.2.5    CVE-2021-44906  9.8    critical  
+  npm   shell-quote         1.7.2    CVE-2021-42740  9.8    critical  
+  npm   socket.io-parser    3.4.1    CVE-2022-2421   9.8    critical  
+  npm   tar                 6.1.0    CVE-2021-37701  8.6    high      
+  npm   tar                 6.1.0    CVE-2021-37712  8.6    high      
+  npm   tar                 6.1.0    CVE-2021-37713  8.6    high      
+  npm   through             2.3.8    CVE-2021-29940  9.8    critical  
+  npm   xmlhttprequest-ssl  1.5.5    CVE-2021-31597  9.4    critical  
+  ```
+
+2. `--sort [sntv]` to sort table results only (sort by score, name, package type, version). `s` is a short for score, `n` - name, `t` - package type, and `v` - version.
+
+  ```bash
+  ❯ mac-scan-cli report vulnerabilities --min-score 8.3 --sort s
+  TYPE  NAME                VERSION  VULNERABILITY   SCORE  SEVERITY 
+  npm   connect             3.7.0    CVE-2016-0949   10.0   critical  
+  npm   connect             3.7.0    CVE-2017-11291  10.0   critical  
+  npm   chainsaw            0.1.0    CVE-2020-9493   9.8    critical  
+  npm   connect             3.7.0    CVE-2018-12804  9.8    critical  
+  npm   connect             3.7.0    CVE-2018-12805  9.8    critical  
+  npm   connect             3.7.0    CVE-2021-40719  9.8    critical  
+  npm   json-schema         0.2.3    CVE-2021-3918   9.8    critical  
+  npm   minimist            1.2.5    CVE-2021-44906  9.8    critical  
+  npm   shell-quote         1.7.2    CVE-2021-42740  9.8    critical  
+  npm   socket.io-parser    3.4.1    CVE-2022-2421   9.8    critical  
+  npm   through             2.3.8    CVE-2021-29940  9.8    critical  
+  npm   xmlhttprequest-ssl  1.5.5    CVE-2021-31597  9.4    critical  
+  npm   connect             3.7.0    CVE-2018-4923   9.1    critical  
+  npm   chainsaw            0.1.0    CVE-2022-23307  9.0    critical  
+  npm   connect             3.7.0    CVE-2016-0948   8.8    high      
+  npm   tar                 6.1.0    CVE-2021-37701  8.6    high      
+  npm   tar                 6.1.0    CVE-2021-37712  8.6    high      
+  npm   tar                 6.1.0    CVE-2021-37713  8.6    high 
+  ```
+
+3. `--display-columns [tnsSvVl]` to show specific table columns. `t` is for package type, `n` - name, `s` - score, `S` - severity, `v` - version, `V` - vulnerability id, `l` - location
+
+  ```bash
+  ❯ mac-scan-cli report vulnerabilities --min-score 8.3 --sort s --display-columns Sn
+  SEVERITY  NAME               
+  critical  chainsaw            
+  critical  connect             
+  critical  json-schema         
+  critical  minimist            
+  critical  shell-quote         
+  critical  socket.io-parser    
+  critical  through             
+  critical  xmlhttprequest-ssl  
+  high      connect             
+  high      tar    
+  ```
+
 ### Scan Modes
 
 #### Full Scan
@@ -508,15 +615,6 @@ Generates and outputs to STDOUT a report of ONLY vulnerabilities the scan found 
       "Package": {
 ```
 
-### /v1/report/reset (POST)
-
-Resets the current catalog of vulnerabilities and packages.
-
-```bash
-❯ curl -X POST http://localhost:8081/v1/report/reset
-{"status":"OK","body":{"state":"Running"},"error":""}
-```
-
 #### ?fromTime=
 
 Reports endpoints allow setting the `fromTime` to isolate packages and vulnerabilities from a specific time.
@@ -575,4 +673,48 @@ Reports endpoints allow setting the `fromTime` to isolate packages and vulnerabi
         "RelatedVulnerabilities": null
       },
       "Package": {
+```
+
+#### ?min_score=
+
+Reports endpoints allow setting the `min_score` to isolate packages and vulnerabilities with certain scores. Can be an integer or decimal.
+
+```bash
+❯ curl -s -X POST "http://localhost:8081/v1/report/vulnerabilities?min_score=8.2" | jq '.body[] | [.Vulnerability.Score,.Package.Name,.Package.Locations[0].path] | join(",")'
+"9.8,minimist,/Users/user1/project/themes/docsy/userguide/package-lock.json"
+"9.4,xmlhttprequest-ssl,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,chainsaw,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9,chainsaw,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,json-schema,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,json-schema,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,socket.io-parser,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"8.8,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"10,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"10,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.1,connect,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,shell-quote,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,shell-quote,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,minimist,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"8.6,tar,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"8.6,tar,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"8.6,tar,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,through,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,through,/Users/user1/project/themes/docsy/assets/vendor/bootstrap/package-lock.json"
+"9.8,through,/Users/user1/project/node_modules/through/package.json"
+"9.8,through,/Users/user1/project/node_modules/through/package.json"
+"9.8,through,/Users/user1/project/package-lock.json"
+"9.8,through,/Users/user1/project/package-lock.json"
+```
+
+
+### /v1/report/reset (POST)
+
+Resets the current catalog of vulnerabilities and packages.
+
+```bash
+❯ curl -X POST http://localhost:8081/v1/report/reset
+{"status":"OK","body":{"state":"Running"},"error":""}
 ```
