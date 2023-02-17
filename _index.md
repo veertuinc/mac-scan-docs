@@ -387,6 +387,26 @@ Stops the scanning and forces population of packages and vulnerabilities.
 {"status":"OK","body":{"state":"Creating catalog"},"error":""}
 ```
 
+#### ?path=
+
+Allows you to target scanning under a specific directory
+
+```bash
+❯ curl -s -X POST http://localhost:8081/v1/fullscan\?path\=/Library/Ruby/Gems/2.6.0
+{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+❯ mac-scan-cli report vulnerabilities | head                                       
+TYPE          NAME                  VERSION            VULNERABILITY     SCORE  SEVERITY 
+gem           actionpack            3.0.1              CVE-2022-27777    6.1    medium    
+gem           activerecord          3.0.1              CVE-2022-32224    9.8    critical  
+gem           activerecord          3.0.1              CVE-2022-44566    7.5    high      
+gem           addressable           2.3.7              CVE-2021-32740    7.5    high      
+gem           addressable           2.5.1              CVE-2021-32740    7.5    high      
+gem           addressable           2.7.0              CVE-2021-32740    7.5    high      
+gem           bundler               1.17.2             CVE-2019-3881     7.8    high      
+gem           bundler               1.17.2             CVE-2020-36327    9.3    critical  
+gem           bundler               1.17.2             CVE-2021-43809    9.3    critical  
+```
+
 ### /v1/report
 
 Generates and outputs to STDOUT a report of packages and vulnerabilities the scan found while running.
