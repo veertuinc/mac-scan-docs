@@ -150,9 +150,9 @@ Global Flags:
   -t, --timestamp string         report packages newer than specified time (RFC3339 format)
 ```
 
-There are several ways to filter results.
+There are several ways to filter results:
 
-1. `--min-score` to specify minimal score:
+1. **`--min-score`** to specify minimal score:
 
   ```bash
   ❯ mac-scan-cli report vulnerabilities --min-score 8.3
@@ -177,7 +177,7 @@ There are several ways to filter results.
   npm   xmlhttprequest-ssl  1.5.5    CVE-2021-31597  9.4    critical  
   ```
 
-2. `--sort [sntv]` to sort table results only (sort by score, name, package type, version). `s` is a short for score, `n` - name, `t` - package type, and `v` - version.
+2. **`--sort [sntv]`** to sort table results only (sort by score, name, package type, version). `s` is a short for score, `n` - name, `t` - package type, and `v` - version.
 
   ```bash
   ❯ mac-scan-cli report vulnerabilities --min-score 8.3 --sort s
@@ -202,7 +202,7 @@ There are several ways to filter results.
   npm   tar                 6.1.0    CVE-2021-37713  8.6    high 
   ```
 
-3. `--display-columns [tnsSvVl]` to show specific table columns. `t` is for package type, `n` - name, `s` - score, `S` - severity, `v` - version, `V` - vulnerability id, `l` - location/path to vulnerability
+3. **`--display-columns [tnsSvVl]`** to show specific table columns. `t` is for package type, `n` - name, `s` - score, `S` - severity, `v` - version, `V` - vulnerability id, `l` - location/path to vulnerability
 
   ```bash
   ❯ mac-scan-cli report vulnerabilities --display-columns nSvVl --sort s --min-score 8.5 | head
