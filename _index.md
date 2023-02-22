@@ -202,21 +202,20 @@ There are several ways to filter results.
   npm   tar                 6.1.0    CVE-2021-37713  8.6    high 
   ```
 
-3. `--display-columns [tnsSvVl]` to show specific table columns. `t` is for package type, `n` - name, `s` - score, `S` - severity, `v` - version, `V` - vulnerability id, `l` - location
+3. `--display-columns [tnsSvVl]` to show specific table columns. `t` is for package type, `n` - name, `s` - score, `S` - severity, `v` - version, `V` - vulnerability id, `l` - location/path to vulnerability
 
   ```bash
-  ❯ mac-scan-cli report vulnerabilities --min-score 8.3 --sort s --display-columns Sn
-  SEVERITY  NAME               
-  critical  chainsaw            
-  critical  connect             
-  critical  json-schema         
-  critical  minimist            
-  critical  shell-quote         
-  critical  socket.io-parser    
-  critical  through             
-  critical  xmlhttprequest-ssl  
-  high      connect             
-  high      tar    
+  ❯ mac-scan-cli report vulnerabilities --display-columns nSvVl --sort s --min-score 8.5 | head
+  NAME                  SEVERITY  VERSION            VULNERABILITY     LOCATION                                                                           
+  activerecord          critical  3.0.1              CVE-2022-32224    /Library/Ruby/Gems/2.6.0/gems/jenkins-0.6.0/fixtures/projects/rails-3/Gemfile.lock  
+  bundler               critical  1.17.2             CVE-2020-36327    /Library/Ruby/Gems/2.6.0/specifications/default/bundler-1.17.2.gemspec              
+  bundler               critical  1.17.2             CVE-2021-43809    /Library/Ruby/Gems/2.6.0/specifications/default/bundler-1.17.2.gemspec              
+  cocoapods-downloader  critical  1.2.2              CVE-2022-21223    /Library/Ruby/Gems/2.6.0/gems/cocoapods-trunk-1.5.0/Gemfile.lock                    
+  cocoapods-downloader  critical  1.2.2              CVE-2022-24440    /Library/Ruby/Gems/2.6.0/gems/cocoapods-trunk-1.5.0/Gemfile.lock                    
+  cocoapods-downloader  critical  1.3.0              CVE-2022-21223    /Library/Ruby/Gems/2.6.0/gems/cocoapods-try-1.2.0/Gemfile.lock                      
+  cocoapods-downloader  critical  1.3.0              CVE-2022-24440    /Library/Ruby/Gems/2.6.0/gems/cocoapods-try-1.2.0/Gemfile.lock                      
+  git                   critical  1.1.4              CVE-2014-9390     /Library/Ruby/Gems/2.6.0/gems/jenkins-0.6.0/fixtures/jenkins/git.hpi                
+  git                   critical  1.1.4              CVE-2015-7082     /Library/Ruby/Gems/2.6.0/gems/jenkins-0.6.0/fixtures/jenkins/git.hpi     
   ```
 
 ### Scan Modes
