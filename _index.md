@@ -89,6 +89,124 @@ listen-port: 8081
 db-backend-path: "/Library/Application Support/mac-scan/pkgstore.db"
 ```
 
+### Scan Modes
+
+#### Full Scan
+
+```bash
+❯ mac-scan-cli       
+This tool provides an interface to communicate with the mac-scand API
+
+Usage:
+  mac-scan-cli [flags]
+  mac-scan-cli [command]
+
+Available Commands:
+  background-watch Watch for file system changes in the background
+  completion       Generate the autocompletion script for the specified shell
+  fullscan         Catalog all the packages on the disk
+  help             Help about any command
+  license          License show/activate
+  report           Report scanning result
+  status           Get status
+  version          Print the version number of rs-cli
+
+Flags:
+  -h, --help   help for mac-scan-cli
+
+Use "mac-scan-cli [command] --help" for more information about a command.
+
+❯ mac-scan-cli report
+No packages discovered
+No vulnerabilities found
+
+❯ mac-scan-cli fullscan
+
+❯ mac-scan-cli report | head -20 
+TYPE            NAME                                                                           VERSION                                                                                           
+brew            amazon-ecs-cli                                                                 1.21.0                                                                                             
+brew            anka-scripts                                                                   c2c6cc19c6406af1bc3b522a14c3884644488954                                                           
+brew            ansible                                                                        6.2.0                                                                                              
+brew            ansible-lint                                                                   6.4.0                                                                                              
+brew            aom                                                                            3.5.0_1                                                                                            
+brew            apr                                                                            1.7.0_2                                                                                            
+brew            apr                                                                            1.7.0_3                                                                                            
+brew            apr-util                                                                       1.6.1_4                                                                                            
+brew            augeas                                                                         1.12.0_1                                                                                           
+brew            autoconf                                                                       2.71                                                                                               
+brew            automake                                                                       1.16.5                                                                                             
+brew            aws-iam-authenticator                                                          0.5.9                                                                                              
+brew            awscli                                                                         2.7.23                                                                                             
+brew            bazel                                                                          5.2.0                                                                                              
+brew            bdw-gc                                                                         8.0.6                                                                                              
+brew            bdw-gc                                                                         8.2.2                                                                                              
+brew            berkeley-db                                                                    18.1.40_1                                                                                          
+brew            boost                                                                          1.80.0                                                                                             
+brew            boost-build                                                                    1.79.0                                                                                             
+. . .
+
+❯ mac-scan-cli report reset
+
+❯ mac-scan-cli report
+No packages discovered
+No vulnerabilities found
+
+```
+
+#### Background Watch
+
+```bash
+❯ mac-scan-cli status      
+Service State:                  Active
+Background Watch State:         Stopped
+
+❯ mac-scan-cli background-watch start
+
+❯ mac-scan-cli status                
+Service State:                  Active
+Background Watch State:         Running
+
+❯ mac-scan-cli report
+No packages discovered
+No vulnerabilities found
+
+# You can see nothing has changed on my computer yet, so nothing was discovered or found. 
+# Let's install an older version of jenkins with ruby gem, immediately stop the scanner 
+# so we only get the changes for the period of time we installed jenkins, and then generate the report:
+
+❯ sudo gem install --version 0.6.0 jenkins
+Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
+Fetching jenkins-0.6.0.gem
+Successfully installed jenkins-0.6.0
+Parsing documentation for jenkins-0.6.0
+Installing ri documentation for jenkins-0.6.0
+Done installing documentation for jenkins after 0 seconds
+1 gem installed
+
+❯ mac-scan-cli background-watch stop
+
+❯ mac-scan-cli report vulnerabilities | head -20
+TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY 
+gem           actionpack        3.0.1              CVE-2022-27777    6.1    medium    
+gem           crack             0.1.8              CVE-2013-1800     7.5    high      
+gem           httparty          0.6.1              CVE-2013-1801     7.5    high      
+gem           i18n              0.4.2              CVE-2013-4492     4.3    medium    
+gem           i18n              0.4.2              CVE-2014-10077    7.5    high      
+gem           i18n              0.4.2              CVE-2020-7791     7.5    high      
+gem           jenkins           0.6.0              CVE-2012-0324     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-0325     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-0785     7.8    high      
+gem           jenkins           0.6.0              CVE-2012-4438     8.8    high      
+gem           jenkins           0.6.0              CVE-2012-4439     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-4440     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-4441     6.1    medium    
+gem           jenkins           0.6.0              CVE-2012-6072     4.3    medium    
+gem           jenkins           0.6.0              CVE-2012-6073     5.8    medium    
+gem           jenkins           0.6.0              CVE-2012-6074     3.5    low       
+gem           jenkins           0.6.0              CVE-2013-0158     2.6    low       
+```
+
+
 ### Generate Report
 
 ```bash
@@ -217,124 +335,7 @@ There are several ways to filter results:
   git                   critical  1.1.4              CVE-2014-9390     /Library/Ruby/Gems/2.6.0/gems/jenkins-0.6.0/fixtures/jenkins/git.hpi                
   git                   critical  1.1.4              CVE-2015-7082     /Library/Ruby/Gems/2.6.0/gems/jenkins-0.6.0/fixtures/jenkins/git.hpi     
   ```
-
-### Scan Modes
-
-#### Full Scan
-
-```bash
-❯ mac-scan-cli       
-This tool provides an interface to communicate with the mac-scand API
-
-Usage:
-  mac-scan-cli [flags]
-  mac-scan-cli [command]
-
-Available Commands:
-  background-watch Watch for file system changes in the background
-  completion       Generate the autocompletion script for the specified shell
-  fullscan         Catalog all the packages on the disk
-  help             Help about any command
-  license          License show/activate
-  report           Report scanning result
-  status           Get status
-  version          Print the version number of rs-cli
-
-Flags:
-  -h, --help   help for mac-scan-cli
-
-Use "mac-scan-cli [command] --help" for more information about a command.
-
-❯ mac-scan-cli report
-No packages discovered
-No vulnerabilities found
-
-❯ mac-scan-cli fullscan
-
-❯ mac-scan-cli report | head -20 
-TYPE            NAME                                                                           VERSION                                                                                           
-brew            amazon-ecs-cli                                                                 1.21.0                                                                                             
-brew            anka-scripts                                                                   c2c6cc19c6406af1bc3b522a14c3884644488954                                                           
-brew            ansible                                                                        6.2.0                                                                                              
-brew            ansible-lint                                                                   6.4.0                                                                                              
-brew            aom                                                                            3.5.0_1                                                                                            
-brew            apr                                                                            1.7.0_2                                                                                            
-brew            apr                                                                            1.7.0_3                                                                                            
-brew            apr-util                                                                       1.6.1_4                                                                                            
-brew            augeas                                                                         1.12.0_1                                                                                           
-brew            autoconf                                                                       2.71                                                                                               
-brew            automake                                                                       1.16.5                                                                                             
-brew            aws-iam-authenticator                                                          0.5.9                                                                                              
-brew            awscli                                                                         2.7.23                                                                                             
-brew            bazel                                                                          5.2.0                                                                                              
-brew            bdw-gc                                                                         8.0.6                                                                                              
-brew            bdw-gc                                                                         8.2.2                                                                                              
-brew            berkeley-db                                                                    18.1.40_1                                                                                          
-brew            boost                                                                          1.80.0                                                                                             
-brew            boost-build                                                                    1.79.0                                                                                             
-. . .
-
-❯ mac-scan-cli report reset
-
-❯ mac-scan-cli report
-No packages discovered
-No vulnerabilities found
-
-```
-
-#### Background Watch
-
-```bash
-❯ mac-scan-cli status      
-Service State:                  Active
-Background Watch State:         Stopped
-
-❯ mac-scan-cli background-watch start
-
-❯ mac-scan-cli status                
-Service State:                  Active
-Background Watch State:         Running
-
-❯ mac-scan-cli report
-No packages discovered
-No vulnerabilities found
-
-# You can see nothing has changed on my computer yet, so nothing was discovered or found. 
-# Let's install an older version of jenkins with ruby gem, immediately stop the scanner 
-# so we only get the changes for the period of time we installed jenkins, and then generate the report:
-
-❯ sudo gem install --version 0.6.0 jenkins
-Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
-Fetching jenkins-0.6.0.gem
-Successfully installed jenkins-0.6.0
-Parsing documentation for jenkins-0.6.0
-Installing ri documentation for jenkins-0.6.0
-Done installing documentation for jenkins after 0 seconds
-1 gem installed
-
-❯ mac-scan-cli background-watch stop
-
-❯ mac-scan-cli report vulnerabilities | head -20
-TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY 
-gem           actionpack        3.0.1              CVE-2022-27777    6.1    medium    
-gem           crack             0.1.8              CVE-2013-1800     7.5    high      
-gem           httparty          0.6.1              CVE-2013-1801     7.5    high      
-gem           i18n              0.4.2              CVE-2013-4492     4.3    medium    
-gem           i18n              0.4.2              CVE-2014-10077    7.5    high      
-gem           i18n              0.4.2              CVE-2020-7791     7.5    high      
-gem           jenkins           0.6.0              CVE-2012-0324     4.3    medium    
-gem           jenkins           0.6.0              CVE-2012-0325     4.3    medium    
-gem           jenkins           0.6.0              CVE-2012-0785     7.8    high      
-gem           jenkins           0.6.0              CVE-2012-4438     8.8    high      
-gem           jenkins           0.6.0              CVE-2012-4439     6.1    medium    
-gem           jenkins           0.6.0              CVE-2012-4440     6.1    medium    
-gem           jenkins           0.6.0              CVE-2012-4441     6.1    medium    
-gem           jenkins           0.6.0              CVE-2012-6072     4.3    medium    
-gem           jenkins           0.6.0              CVE-2012-6073     5.8    medium    
-gem           jenkins           0.6.0              CVE-2012-6074     3.5    low       
-gem           jenkins           0.6.0              CVE-2013-0158     2.6    low       
-```
-
+  
 ## REST API
 
 An alternative to the included CLI is using the API directly with `curl`.
