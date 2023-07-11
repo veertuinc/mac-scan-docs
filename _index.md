@@ -62,7 +62,7 @@ Note that there is an uninstaller script:
 ```bash
 ❯ sudo /Library/Application\ Support/mac-scan/uninstall.sh
 The following packages will be REMOVED:
-  mac-scan-0.3.0
+  mac-scan-0.5.0
 Do you wish to continue [Y/n]?Y
 mac-scan uninstall process started...
 [1/3] [DONE] Successfully deleted shortcut links
@@ -94,7 +94,7 @@ db-backend-path: "/Library/Application Support/mac-scan/pkgstore.db"
 #### Full Scan
 
 ```bash
-❯ mac-scan-cli       
+❯ mac-scan-cli
 This tool provides an interface to communicate with the mac-scand API
 
 Usage:
@@ -102,17 +102,18 @@ Usage:
   mac-scan-cli [command]
 
 Available Commands:
-  background-watch Watch for file system changes in the background
-  completion       Generate the autocompletion script for the specified shell
-  fullscan         Catalog all the packages on the disk
-  help             Help about any command
-  license          License show/activate
-  report           Report scanning result
-  status           Get status
-  version          Print the version number of rs-cli
+  completion     Generate the autocompletion script for the specified shell
+  full-scan      Start full scan
+  help           Help about any command
+  license        License show/activate
+  real-time-scan Start real-time scan in background
+  report         Report scanning result
+  status         Get status
+  version        Print the version number of mac-scan
 
 Flags:
-  -h, --help   help for mac-scan-cli
+  -h, --help       help for mac-scan-cli
+  -p, --port int   default port (default 8081)
 
 Use "mac-scan-cli [command] --help" for more information about a command.
 
@@ -120,7 +121,7 @@ Use "mac-scan-cli [command] --help" for more information about a command.
 No packages discovered
 No vulnerabilities found
 
-❯ mac-scan-cli fullscan
+❯ mac-scan-cli full-scan
 
 ❯ mac-scan-cli report | head -20 
 TYPE            NAME                                                                           VERSION                                                                                           
@@ -153,18 +154,18 @@ No vulnerabilities found
 
 ```
 
-#### Background Watch
+#### Real-Time Scan
 
 ```bash
 ❯ mac-scan-cli status      
 Service State:                  Active
-Background Watch State:         Stopped
+Real-Time Scan State:         Stopped
 
-❯ mac-scan-cli background-watch start
+❯ mac-scan-cli real-time-scan start
 
 ❯ mac-scan-cli status                
 Service State:                  Active
-Background Watch State:         Running
+Real-Time Scan State:         Running
 
 ❯ mac-scan-cli report
 No packages discovered
@@ -183,7 +184,7 @@ Installing ri documentation for jenkins-0.6.0
 Done installing documentation for jenkins after 0 seconds
 1 gem installed
 
-❯ mac-scan-cli background-watch stop
+❯ mac-scan-cli real-time-scan stop
 
 ❯ mac-scan-cli report vulnerabilities | head -20
 TYPE          NAME              VERSION            VULNERABILITY     SCORE  SEVERITY 
@@ -349,39 +350,39 @@ Returns the state of the scanning.
 {"status":"OK","body":{"state":"Stopped"},"error":""}
 ```
 
-### /v1/backgroundwatch/start (POST)
+### /v1/real-time-scan/start (POST)
 
 Starts the scanning.
 
 ```bash
 ❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Stopped"},"error":""}
-❯ curl -X POST http://localhost:8081/v1/backgroundwatch/start
+❯ curl -X POST http://localhost:8081/v1/real-time-scan/start
 {"status":"OK","body":{"state":"Running"},"error":""}
 ❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Running"},"error":""}
 ```
 
-### /v1/backgroundwatch/stop (POST)
+### /v1/real-time-scan/stop (POST)
 
 Stops the scanning and forces population of packages and vulnerabilities.
 
 ```bash
 ❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Running"},"error":""}
-❯ curl -X POST http://localhost:8081/v1/backgroundwatch/stop
+❯ curl -X POST http://localhost:8081/v1/real-time-scan/stop
 {"status":"OK","body":{"state":"Running"},"error":""}
 # Be patient as this can take a long time to return depending on the scan's state
 ❯ curl http://localhost:8081/v1/status
 {"status":"OK","body":{"state":"Stopped"},"error":""}
 ```
 
-### /v1/fullscan (POST)
+### /v1/full-scan (POST)
 
 Stops the scanning and forces population of packages and vulnerabilities.
 
 ```bash
-❯ curl -X POST http://localhost:8081/v1/fullscan
+❯ curl -X POST http://localhost:8081/v1/full-scan
 {"status":"OK","body":{"state":"Creating catalog"},"error":""}
 ❯ curl http://localhost:8081/v1/status          
 {"status":"OK","body":{"state":"Creating catalog"},"error":""}
@@ -392,7 +393,7 @@ Stops the scanning and forces population of packages and vulnerabilities.
 Allows you to target scanning under a specific directory
 
 ```bash
-❯ curl -s -X POST http://localhost:8081/v1/fullscan\?path\=/Library/Ruby/Gems/2.6.0
+❯ curl -s -X POST http://localhost:8081/v1/full-scan\?path\=/Library/Ruby/Gems/2.6.0
 {"status":"OK","body":{"state":"Creating catalog"},"error":""}
 ❯ mac-scan-cli report vulnerabilities | head                                       
 TYPE          NAME                  VERSION            VULNERABILITY     SCORE  SEVERITY 
