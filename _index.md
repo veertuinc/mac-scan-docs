@@ -121,6 +121,21 @@ Use "mac-scan-cli [command] --help" for more information about a command.
 No packages discovered
 No vulnerabilities found
 
+❯ mac-scan-cli full-scan --help
+Starts full scan of the disk to catalog all packages and vulnerabilities
+
+Usage:
+  mac-scan-cli full-scan [flags]
+
+Flags:
+  -h, --help             help for full-scan
+  -w, --no-wait          Start full scan in the background
+  -d, --path string      Path to scan
+  -b, --real-time-scan   Start real-time scan after full scan is complete
+
+Global Flags:
+  -p, --port int   default port (default 8081)
+
 ❯ mac-scan-cli full-scan
 
 ❯ mac-scan-cli report | head -20 
@@ -158,14 +173,27 @@ No vulnerabilities found
 
 ```bash
 ❯ mac-scan-cli status      
-Service State:                  Active
-Real-Time Scan State:         Stopped
+Service State: 	Active
+Scan State: 	  Idle
+
+❯ mac-scan-cli real-time-scan start --help
+Tells runtime scanner to start real-time package inspect
+
+Usage:
+  mac-scan-cli real-time-scan start [flags]
+
+Flags:
+  -h, --help          help for start
+  -d, --path string   Path to scan
+
+Global Flags:
+  -p, --port int   default port (default 8081)
 
 ❯ mac-scan-cli real-time-scan start
 
 ❯ mac-scan-cli status                
-Service State:                  Active
-Real-Time Scan State:         Running
+Service State:  Active
+Scan State:     Real-Time
 
 ❯ mac-scan-cli report
 No packages discovered
@@ -347,7 +375,7 @@ Returns the state of the scanning.
 
 ```bash
 ❯ curl http://localhost:8081/v1/status
-{"status":"OK","body":{"state":"Stopped"},"error":""}
+{"status":"OK","body":{"state":"Idle"},"error":""}
 ```
 
 ### /v1/real-time-scan/start (POST)
@@ -356,11 +384,20 @@ Starts the scanning.
 
 ```bash
 ❯ curl http://localhost:8081/v1/status
-{"status":"OK","body":{"state":"Stopped"},"error":""}
+{"status":"OK","body":{"state":"Idle"},"error":""}
 ❯ curl -X POST http://localhost:8081/v1/real-time-scan/start
-{"status":"OK","body":{"state":"Running"},"error":""}
+{"status":"OK","body":{"state":"Real-Time"},"error":""}
 ❯ curl http://localhost:8081/v1/status
-{"status":"OK","body":{"state":"Running"},"error":""}
+{"status":"OK","body":{"state":"Real-Time"},"error":""}
+```
+
+#### ?path=
+
+Allows you to target scanning under a specific directory
+
+```bash
+❯ curl -s -X POST http://localhost:8081/v1/real-time-scan/start\?path\=/Library/Ruby/Gems
+{"status":"OK","body":{"state":"Running Full"},"error":""}
 ```
 
 ### /v1/real-time-scan/stop (POST)
@@ -369,12 +406,12 @@ Stops the scanning and forces population of packages and vulnerabilities.
 
 ```bash
 ❯ curl http://localhost:8081/v1/status
-{"status":"OK","body":{"state":"Running"},"error":""}
+{"status":"OK","body":{"state":"Real-Time"},"error":""}
 ❯ curl -X POST http://localhost:8081/v1/real-time-scan/stop
-{"status":"OK","body":{"state":"Running"},"error":""}
+{"status":"OK","body":{"state":"Real-Time"},"error":""}
 # Be patient as this can take a long time to return depending on the scan's state
 ❯ curl http://localhost:8081/v1/status
-{"status":"OK","body":{"state":"Stopped"},"error":""}
+{"status":"OK","body":{"state":"Idle"},"error":""}
 ```
 
 ### /v1/full-scan (POST)
@@ -383,9 +420,9 @@ Stops the scanning and forces population of packages and vulnerabilities.
 
 ```bash
 ❯ curl -X POST http://localhost:8081/v1/full-scan
-{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+{"status":"OK","body":{"state":"Running Full"},"error":""}
 ❯ curl http://localhost:8081/v1/status          
-{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+{"status":"OK","body":{"state":"Running Full"},"error":""}
 ```
 
 #### ?path=
@@ -394,7 +431,7 @@ Allows you to target scanning under a specific directory
 
 ```bash
 ❯ curl -s -X POST http://localhost:8081/v1/full-scan\?path\=/Library/Ruby/Gems/2.6.0
-{"status":"OK","body":{"state":"Creating catalog"},"error":""}
+{"status":"OK","body":{"state":"Running Full"},"error":""}
 ❯ mac-scan-cli report vulnerabilities | head                                       
 TYPE          NAME                  VERSION            VULNERABILITY     SCORE  SEVERITY 
 gem           actionpack            3.0.1              CVE-2022-27777    6.1    medium    
@@ -737,5 +774,5 @@ Resets the current catalog of vulnerabilities and packages.
 
 ```bash
 ❯ curl -X POST http://localhost:8081/v1/report/reset
-{"status":"OK","body":{"state":"Running"},"error":""}
+{"status":"OK","body":{"state":"Real-Time"},"error":""}
 ```
