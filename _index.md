@@ -21,7 +21,7 @@ Once the mac-scan package has been installed, the binaries and other mac-scan re
 ```bash
 ❯ sudo pkgutil --pkg-info com.veertu.mac-scan
 package-id: com.veertu.mac-scan
-version: 0.3.0
+version: 0.6.2
 volume: /
 location: /
 install-time: 1666209750
