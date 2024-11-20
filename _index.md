@@ -85,8 +85,12 @@ vuln-db-path: "/Library/Application Support/mac-scan/scanner.db"
 disable-auto-update: false
 ignore-packages:
   - "cpe:/a:apple:icloud:1.0"
-listen-port: 8081
+ignore-cves: []
+min-score: 0.0
+min-severity: "low"
+listen-addr: 127.0.0.1:8081
 db-backend-path: "/Library/Application Support/mac-scan/pkgstore.db"
+db-update-interval: "24h"
 ```
 
 ### Scan Modes
